@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* Warna dan huruf mengikuti desain Figma "Raja Katsu – UI Design", halaman "04 Desain v3 (Kedai Katsu)". */
+@theme {
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Zen Maru Gothic", "Figtree", ui-sans-serif, system-ui, sans-serif;
+
+  --color-kubis: #eef2e5; /* latar halaman */
+  --color-nasi: #fffef9; /* kertas, kartu, slip */
+  --color-saus: #2b1a12; /* teks utama, bilah atas */
+  --color-saus-terang: #4a3328;
+  --color-saus-2: #5a4538; /* teks kedua */
+  --color-saus-3: #7a6556; /* teks keterangan */
+  --color-garis: #d5dec3;
+  --color-panko: #f2b233; /* aksi utama */
+  --color-panko-tua: #e09f1f;
+  --color-panko-muda: #fdf0cf;
+  --color-daun: #3a682c; /* uang, laba */
+  --color-daun-muda: #e1ecd3;
+  --color-ume: #a8323e; /* batal, peringatan, cap */
+  --color-ume-muda: #f8e1e1;
+}
+
+body {
+  @apply bg-kubis font-sans text-saus antialiased;
+}
+
+/* Sembunyikan panah naik-turun di kolom angka */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@layer components {
+  .btn-primary,
+  .btn-ghost,
+  .btn-danger,
+  .btn-ume,
+  .btn-asisten {
+    @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-[14px] px-5 py-3 text-[15px] font-bold transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-panko text-saus hover:bg-panko-tua;
+  }
+  .btn-ghost {
+    @apply border-[1.5px] border-garis bg-nasi text-saus hover:bg-kubis;
+  }
+  .btn-danger {
+    @apply bg-ume-muda text-ume hover:bg-ume hover:text-nasi;
+  }
+  .btn-ume {
+    @apply bg-ume text-nasi hover:bg-ume/90;
+  }
+  /* Tombol pembuka asisten AI: cokelat saus, ikon kuning panko */
+  .btn-asisten {
+    @apply bg-saus text-nasi hover:bg-saus-terang;
+  }
+  .btn-ikon {
+    @apply flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-kubis text-saus hover:bg-garis disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .input {
+    @apply min-h-12 w-full rounded-[14px] border-[1.5px] border-garis bg-nasi px-3.5 py-3 text-base text-saus outline-none placeholder:text-saus-3 focus:border-2 focus:border-saus focus:px-[13.5px];
+  }
+  .card {
+    @apply rounded-3xl bg-nasi;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-saus;
+  }
+  .judul {
+    @apply font-display font-black text-saus;
+  }
+  .angka {
+    @apply font-display font-bold;
+  }
+  .chip {
+    @apply inline-flex min-h-12 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-garis bg-nasi px-4 text-[15px] font-semibold text-saus;
+  }
+  .chip-aktif {
+    @apply border-saus bg-saus text-nasi;
+  }
+  .tautan {
+    @apply cursor-pointer text-sm font-bold text-saus underline underline-offset-4 hover:text-saus-2;
+  }
+
+  /* Slip pesanan: kertas dengan tepi bergerigi di atas dan bawah */
+  .slip {
+    --gerigi: 8px;
+    @apply bg-nasi;
+    -webkit-mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--gerigi) * 2) var(--gerigi) repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(var(--gerigi) * 2) var(--gerigi) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - var(--gerigi) * 2 + 1px) no-repeat;
+    mask:
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(var(--gerigi) * 2) var(--gerigi) repeat-x,
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(var(--gerigi) * 2) var(--gerigi) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - var(--gerigi) * 2 + 1px) no-repeat;
+  }
+  /* Bayangan slip dipasang di pembungkusnya, karena mask memotong bayangan */
+  .slip-bayang {
+    filter: drop-shadow(0 8px 10px rgb(43 26 18 / 0.08));
+  }
+  /* Baris pil yang bisa digeser ke samping tanpa batang gulir yang terlihat */
+  .gulir-x {
+    scrollbar-width: none;
+  }
+  .gulir-x::-webkit-scrollbar {
+    display: none;
+  }
+  .sobek {
+    @apply border-t-[1.5px] border-dashed border-garis;
+  }
+}
