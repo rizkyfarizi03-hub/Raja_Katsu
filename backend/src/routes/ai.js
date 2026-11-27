@@ -3,6 +3,7 @@ import { query } from '../db.js';
 import { AppError, wrap } from '../middleware/error.js';
 import { validate } from '../middleware/validate.js';
 import { askSchema } from '../validators/schemas.js';
+import { buildAiBusinessContext } from '../services/ai-business-context.js';
 
 // Asisten AI, khusus admin. Frontend tidak memanggil layanan AI langsung:
 // pertanyaan masuk ke sini, disimpan di tabel ai_history, lalu diteruskan ke layanan AI tim AE
@@ -24,7 +25,7 @@ const simpan = async (userId, role, content, source = null) =>
   )).rows[0];
 
 // Meneruskan pertanyaan ke layanan AI. Kontrak request/response ada di docs/api-contract.md bagian Asisten AI.
-const tanyaLayananAI = async (user, question, history) => {
+const tanyaLayananAI = async (user, question, history, businessContext) => {
   const timeout = Number(process.env.AI_TIMEOUT_MS) || 20000;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
@@ -36,7 +37,7 @@ const tanyaLayananAI = async (user, question, history) => {
         'Content-Type': 'application/json',
         ...(process.env.AI_API_KEY ? { Authorization: `Bearer ${process.env.AI_API_KEY}` } : {}),
       },
-      body: JSON.stringify({ question, history, user: { id: user.id, name: user.name, role: user.role } }),
+      body: JSON.stringify({ question, history, user: { role: user.role }, business_context: businessContext }),
       signal: ctrl.signal,
     });
   } catch (err) {
@@ -71,8 +72,9 @@ router.post('/chat', validate(askSchema), wrap(async (req, res) => {
     [req.user.id]
   );
   const pertanyaan = await simpan(req.user.id, 'user', question);
+  const businessContext = tersambung() ? await buildAiBusinessContext(question) : null;
   const { answer, source } = tersambung()
-    ? await tanyaLayananAI(req.user, question, history)
+    ? await tanyaLayananAI(req.user, question, history, businessContext)
     : { answer: BELUM_TERSAMBUNG, source: null };
   const jawaban = await simpan(req.user.id, 'assistant', answer, source);
   res.status(201).json({ status: 'success', data: { connected: tersambung(), messages: [pertanyaan, jawaban] } });
