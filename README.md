@@ -4,8 +4,9 @@ Proyek ABK Capstone (Asah 2026), bagian Full-Stack.
 
 ```
 raja-katsu/
-├── backend/    Express + PostgreSQL, API di /api/v1
 ├── frontend/   React + Vite + Tailwind CSS + Axios
+├── backend/    Express + PostgreSQL, API di /api/v1
+├── ai-service/ FastAPI + Gemini untuk asisten AI
 └── docs/       Kontrak API dan format data (untuk tim DS dan AE)
 ```
 
@@ -76,18 +77,16 @@ admin. Akun kasir dibuat dari halaman Pengguna.
 
 ### Asisten AI
 
-Tombol **Tanya asisten** ada di Beranda (laptop) dan bilah atas (HP), khusus admin. Frontend memanggil
-`/api/v1/ai/chat` di backend, lalu backend meneruskannya ke layanan AI tim AE. Isi variabel ini di `backend/.env`:
+Asisten AI tersedia untuk admin. Frontend mengirim pertanyaan ke backend Raja Katsu; backend menyiapkan business context dari laporan dan meneruskannya ke AI Service FastAPI + Gemini di `ai-service/`. AI Service tidak mengakses PostgreSQL secara langsung.
+
+Konfigurasi alamat AI Service di `backend/.env`:
 
 ```
-AI_API_URL=        # alamat layanan AI (FastAPI/Flask), kosongkan selama belum siap
-AI_API_KEY=        # opsional, dikirim sebagai header Authorization: Bearer
+AI_API_URL=http://127.0.0.1:8001/
 AI_TIMEOUT_MS=20000
 ```
 
-Selama `AI_API_URL` kosong, asisten menjawab bahwa layanannya belum tersambung. Riwayat percakapan disimpan di
-tabel `ai_history` (jalankan `npm run db:schema` sekali untuk membuat tabelnya). Kontrak request/response untuk
-tim AE ada di `docs/api-contract.md`, bagian Asisten AI.
+Riwayat percakapan disimpan di tabel `ai_history` (jalankan `npm run db:schema` sekali untuk membuat tabelnya). Konfigurasi dan cara menjalankan AI Service dijelaskan di [`docs/chatbot-ai-service.md`](docs/chatbot-ai-service.md); kontrak request/response ada di [`docs/api-contract.md`](docs/api-contract.md#asisten-ai-khusus-admin).
 
 ## Database
 

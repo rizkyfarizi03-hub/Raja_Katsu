@@ -240,29 +240,53 @@ Request:
     { "role": "user", "content": "pertanyaan sebelumnya" },
     { "role": "assistant", "content": "jawaban sebelumnya" }
   ],
-  "user": { "id": 1, "name": "Pemilik", "role": "admin" }
+  "user": { "role": "admin" },
+  "business_context": {
+    "data_status": "available",
+    "has_sales": true,
+    "period": {
+      "label": "7 hari terakhir",
+      "from": "2026-11-19",
+      "to": "2026-11-25",
+      "timezone": "Asia/Jakarta"
+    },
+    "summary": {
+      "revenue": 1194000,
+      "cost": 700000,
+      "gross_profit": 494000,
+      "units_sold": 42,
+      "transaction_lines": 20,
+      "orders": 18,
+      "margin_percent": 41.4
+    },
+    "top_products": [],
+    "by_payment": [],
+    "sources": ["GET /api/v1/reports/summary"]
+  }
 }
 ```
 
 `history` berisi paling banyak 10 pesan terakhir, urut dari yang lama.
+`business_context` berisi agregat laporan yang disiapkan backend untuk pertanyaan bisnis; nilainya `null`
+untuk pertanyaan yang tidak meminta data aktual. Backend tidak mengirim data pelanggan atau transaksi mentah.
+AI Service hanya memakai context yang dikirim dan tidak mengakses database atau endpoint backend.
 
 Response yang diharapkan (status 200):
 
 ```json
-{ "answer": "Minggu ini uang masuk Rp1.194.000 ...", "source": "data penjualan 3–9 Nov 2026" }
+{ "answer": "Omzet 7 hari terakhir adalah Rp1.194.000 ...", "source": "sales_data" }
 ```
 
-`answer` wajib diisi (teks biasa, maksimal 4000 huruf). `source` boleh dikosongkan. Kalau sedang kena batas
-pemakaian API, balas dengan status `429`. Data penjualan bisa diambil layanan AI dari endpoint ekspor CSV atau
-dari database yang sama; ini masih perlu disepakati.
+`answer` wajib diisi (teks biasa, maksimal 4000 huruf). `source` berisi salah satu nilai `business_context`, `sales_data`, `analysis`, atau `unknown`. Kalau sedang kena batas
+pemakaian API, balas dengan status `429`. Backend Raja Katsu menyiapkan agregat dari laporan dan mengirimkannya
+melalui `business_context`; AI Service tidak mengambil data dari CSV, endpoint backend, atau database.
 
-## 4. Yang masih perlu disepakati dengan DS dan AE
+## 4. Hal yang masih perlu disepakati dengan DS dan AE
 
-Endpoint berikut belum dibuat. Ini usulan bentuknya supaya bisa dibahas:
+Bagian ini mencatat kebutuhan lintas tim yang masih perlu dibahas:
 
 | Kebutuhan | Usulan | Pertanyaan untuk tim |
 |---|---|---|
 | Hasil DS tampil di aplikasi | `GET /api/v1/insights/...` (backend meneruskan ke layanan DS) | Bentuknya dasbor, prediksi, atau rekomendasi? Format response-nya apa? |
-| Fitur Gen AI | Sudah ada `POST /api/v1/ai/chat` (lihat bagian Asisten AI). Tinggal mengisi `AI_API_URL` | Alamat layanan FastAPI/Flask-nya apa, dan apakah bentuk request/response di atas cocok? |
 | Riwayat Gen AI | Sudah ada tabel `ai_history` | Perlu kolom tambahan (misalnya nama model atau lama menjawab)? |
 | Nama produk | Ganti ke menu Raja Katsu atau tetap data dummy | Siapa yang menyiapkan daftar menu, harga, dan modalnya? |
